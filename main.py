@@ -11,7 +11,7 @@ header = ['Index', 'Amplitude (0-4096)']
 #plot
 fig= plt.figure()
 ax = fig.add_subplot(111)
-ax.set_ylim(0,4097)
+ax.set_ylim(0,100)
 ax.set_title("plot")
 currentdata = []
 
@@ -19,6 +19,14 @@ currentdata = []
 recordingtime = 300
 setuptime = 10
 delay = 0.02
+
+def isnan(input):
+    try:
+        float(input)
+        return True
+    except:
+        return False
+
 
 
 with sr.Serial(port=espport,baudrate=baud) as serialread, \
@@ -40,22 +48,31 @@ with sr.Serial(port=espport,baudrate=baud) as serialread, \
             
         while i<(recordingtime/delay):
             # reading
-            line = int(serialread.readline().decode('utf-8').strip())
+            line = serialread.readline().decode('utf-8').strip()
             print("line:",line)
             print("recording time elapsed:", i*delay)
             # note i disini masih index i
             
             # writing
-            data = [i, line]
-            print(data)
-            var.writerow(data)
-            i+=1
+
+            if isnan(line):
+                currentdata.append(int(line))
+                currentdata  = currentdata[-50:]
+                ax.clear() 
+                ax.plot(currentdata) 
+                ax.set_ylim(0, 4097)
+                ax.set_title("plot (delay +- 7s)")
+                plt.pause(0.01)
+                
+                data = [i, int(line)]
+                print(data)
+                var.writerow(data)
+                i+=1
+            else:
+                data = [i, line]
+                print(data)
+                var.writerow(data)
+                i+=1
+            
             
             # plotting
-            currentdata.append(line)
-            currentdata  = currentdata[-50:]
-            ax.clear() 
-            ax.plot(currentdata) 
-            ax.set_ylim(0, 4097)
-            ax.set_title("plot (delay +- 7s)")
-            plt.pause(0.01)
