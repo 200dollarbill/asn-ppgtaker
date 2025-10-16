@@ -17,7 +17,7 @@ currentdata = []
 
 # var
 recordingtime = 300
-setuptime = 10
+setuptime = 60
 delay = 0.02
 
 def isnan(input):
@@ -69,10 +69,7 @@ with sr.Serial(port=espport,baudrate=baud) as serialread, \
                 var.writerow(data)
                 i+=1
             else:
-                data = [i, line]
-                print(data)
-                var.writerow(data)
-                i+=1
+                pass
             
             
             # plotting
